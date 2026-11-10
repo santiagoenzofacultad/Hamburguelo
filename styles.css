@@ -1,0 +1,580 @@
+/* ==========================================================
+   HAMBURGUELO · Estilos
+   Enfoque "mobile first": primero se escribe para celular y
+   después se agregan reglas para pantallas más grandes
+   con @media (min-width: ...).
+   ========================================================== */
+
+/* ---------- 1. VARIABLES (colores, tipografías, medidas) ---------- */
+:root {
+  --mostaza: #F5B81C;
+  --mostaza-oscuro: #E0A30C;
+  --marron: #2B1810;
+  --marron-suave: #4A2E22;
+  --crema: #F8F1E0;
+  --blanco: #FFFFFF;
+  --tomate: #D8341F;
+  --lechuga: #4C8C2B;
+
+  --fuente-titulos: "Lilita One", "Arial Black", sans-serif;
+  --fuente-texto: "Nunito", "Segoe UI", Arial, sans-serif;
+
+  --radio: 18px;
+  --radio-chico: 12px;
+  --sombra: 0 8px 24px rgba(43, 24, 16, 0.14);
+  --sombra-fuerte: 0 14px 34px rgba(43, 24, 16, 0.22);
+  --alto-encabezado: 76px;
+}
+
+/* ---------- 2. BASE ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;                 /* scroll suave al tocar los enlaces del menú */
+  scroll-padding-top: var(--alto-encabezado); /* evita que el encabezado fijo tape los títulos */
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente-texto);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--marron);
+  background: var(--crema);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;                        /* Lilita One ya es gruesa por sí sola */
+  line-height: 1.1;
+  margin: 0 0 0.6rem;
+  letter-spacing: 0.01em;
+}
+
+h1 { font-size: clamp(2.4rem, 7vw, 4.2rem); }
+h2 { font-size: clamp(2rem, 5vw, 3rem); }
+h3 { font-size: 1.4rem; }
+
+p { margin: 0 0 1rem; }
+ul { margin: 0; padding: 0; list-style: none; }
+a { color: inherit; }
+
+/* Foco visible para quienes navegan con teclado */
+:focus-visible {
+  outline: 3px solid var(--tomate);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Enlace "saltar al contenido": invisible hasta recibir foco */
+.saltar {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: var(--marron);
+  color: var(--crema);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radio-chico);
+  z-index: 200;
+}
+.saltar:focus { top: 1rem; }
+
+/* ---------- 3. UTILIDADES ---------- */
+.contenedor {
+  width: min(100% - 2.5rem, 1120px);
+  margin-inline: auto;
+}
+.contenedor--angosto { width: min(100% - 2.5rem, 780px); }
+
+.etiqueta {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--marron);
+  color: var(--mostaza);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+.etiqueta--oscura { background: var(--mostaza); color: var(--marron); }
+
+/* ---------- 4. BOTONES ---------- */
+.btn {
+  display: inline-block;
+  font-family: var(--fuente-titulos);
+  font-size: 1.15rem;
+  text-decoration: none;
+  text-align: center;
+  border: 3px solid var(--marron);
+  border-radius: 999px;
+  padding: 0.75rem 1.8rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
+.btn:active { transform: translateY(0); }
+
+.btn--principal { background: var(--marron); color: var(--mostaza); }
+.btn--principal:hover { background: var(--marron-suave); }
+
+.btn--secundario { background: var(--mostaza); color: var(--marron); }
+.btn--secundario:hover { background: var(--mostaza-oscuro); }
+
+.btn--ancho { width: 100%; }
+
+.btn-texto {
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--marron-suave);
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+.btn-texto:hover { color: var(--tomate); }
+
+/* ---------- 5. ENCABEZADO ---------- */
+.encabezado {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--alto-encabezado);
+  background: var(--mostaza);
+  border-bottom: 3px solid var(--marron);
+  z-index: 100;
+}
+
+.encabezado__barra {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* El logo original es cuadrado: lo recortamos a un formato ancho mostrando solo el centro */
+.marca__logo {
+  width: 124px;
+  height: 58px;
+  object-fit: cover;
+  object-position: 50% 40%;
+  border-radius: 10px;
+}
+
+.encabezado__acciones { display: flex; align-items: center; gap: 0.6rem; }
+
+.carrito-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  background: var(--marron);
+  color: var(--crema);
+  font-weight: 800;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  transition: transform 0.15s ease;
+}
+.carrito-chip:hover { transform: scale(1.05); }
+
+.carrito-chip__cuenta {
+  min-width: 1.5rem;
+  text-align: center;
+  background: var(--mostaza);
+  color: var(--marron);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+.carrito-chip--salto { animation: salto 0.4s ease; } /* pequeña animación al agregar */
+
+@keyframes salto {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+/* Botón de menú (hamburguesa de 3 líneas) */
+.btn-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  background: transparent;
+  border: 3px solid var(--marron);
+  border-radius: var(--radio-chico);
+  cursor: pointer;
+}
+.btn-menu__linea {
+  display: block;
+  height: 3px;
+  background: var(--marron);
+  border-radius: 2px;
+}
+
+/* Navegación en celular: panel que baja desde el encabezado */
+.nav {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--crema);
+  border-bottom: 3px solid var(--marron);
+  box-shadow: var(--sombra);
+  display: none;
+}
+.nav.nav--abierta { display: block; }
+
+.nav__lista { padding: 0.6rem 1.25rem 1rem; }
+.nav__lista a {
+  display: block;
+  padding: 0.8rem 0.4rem;
+  font-weight: 800;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(43, 24, 16, 0.12);
+}
+.nav__lista a:hover { color: var(--tomate); }
+
+/* ---------- 6. INICIO ---------- */
+.inicio {
+  background: var(--mostaza);
+  padding: calc(var(--alto-encabezado) + 2.5rem) 0 4rem;
+  border-bottom: 3px solid var(--marron);
+}
+
+.inicio__grilla {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.inicio__bajada {
+  font-size: 1.2rem;
+  max-width: 34ch;
+  margin-bottom: 1.8rem;
+}
+
+/* El logo funciona como "sticker" sobre el amarillo */
+.inicio__logo img {
+  width: min(100%, 400px);
+  height: auto;
+  margin-inline: auto;
+  border-radius: 32px;
+  border: 4px solid var(--marron);
+  box-shadow: var(--sombra-fuerte);
+  transform: rotate(-3deg);
+  transition: transform 0.3s ease;
+}
+.inicio__logo img:hover { transform: rotate(0deg) scale(1.02); }
+
+/* ---------- 7. SECCIONES ---------- */
+.seccion { padding: 5rem 0; }
+.seccion--crema { background: var(--blanco); border-block: 3px solid var(--marron); }
+.seccion--oscura { background: var(--marron); color: var(--crema); }
+
+.seccion__cabecera { text-align: center; margin-bottom: 2.5rem; }
+.seccion__cabecera p:last-child { max-width: 46ch; margin-inline: auto; }
+
+/* ---------- 8. MENÚ (tarjetas) ---------- */
+.menu-grilla { display: grid; gap: 1.5rem; }
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  background: var(--blanco);
+  border: 3px solid var(--marron);
+  border-radius: var(--radio);
+  overflow: hidden;
+  box-shadow: var(--sombra);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tarjeta:hover { transform: translateY(-4px); box-shadow: var(--sombra-fuerte); }
+
+/* Espacio para la imagen: hoy un color con emoji, mañana una foto real (ver README del final) */
+.tarjeta__imagen {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  font-size: 4.5rem;
+  border-bottom: 3px solid var(--marron);
+}
+.tarjeta__imagen img { width: 100%; height: 100%; object-fit: cover; }
+
+.tarjeta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.25rem;
+}
+.tarjeta__cuerpo p { font-size: 0.98rem; }
+
+.tarjeta__ingredientes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+.tarjeta__ingredientes li {
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--crema);
+  border: 1px solid rgba(43, 24, 16, 0.25);
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+}
+
+.tarjeta__pie {
+  margin-top: auto;               /* empuja precio y botón al fondo, así todas las tarjetas se alinean */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+.tarjeta__precio {
+  font-family: var(--fuente-titulos);
+  font-size: 1.7rem;
+  color: var(--tomate);
+}
+.tarjeta__pie .btn { font-size: 1rem; padding: 0.6rem 1.1rem; }
+
+/* ---------- 9. CARRITO ---------- */
+.carrito {
+  background: var(--crema);
+  border: 3px solid var(--marron);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  box-shadow: var(--sombra);
+}
+
+.carrito__vacio { text-align: center; padding: 2rem 1rem; }
+.carrito__vacio-emoji { font-size: 3.5rem; margin-bottom: 0.5rem; }
+
+.carrito__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 2px dashed rgba(43, 24, 16, 0.25);
+}
+.carrito__item:first-child { padding-top: 0; }
+
+.carrito__emoji {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  font-size: 2rem;
+  border: 2px solid var(--marron);
+  border-radius: var(--radio-chico);
+}
+.carrito__nombre { font-weight: 800; line-height: 1.25; }
+.carrito__unitario { font-size: 0.9rem; color: var(--marron-suave); }
+
+.carrito__controles {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--marron);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--blanco);
+}
+.cantidad button {
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: var(--mostaza);
+  border: none;
+  color: var(--marron);
+  cursor: pointer;
+}
+.cantidad button:hover { background: var(--mostaza-oscuro); }
+.cantidad span { min-width: 2.4rem; text-align: center; font-weight: 800; }
+
+.carrito__subtotal { font-weight: 800; font-size: 1.1rem; }
+
+.carrito__quitar {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--tomate);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.carrito__pie { padding-top: 1.2rem; text-align: center; }
+.carrito__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+.carrito__total strong {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  font-size: 2rem;
+  color: var(--tomate);
+}
+.carrito__aviso { margin: 0.8rem 0 0; font-size: 0.92rem; color: var(--marron-suave); }
+
+/* ---------- 10. QUIÉNES SOMOS ---------- */
+.nosotros__historia { font-size: 1.15rem; text-align: center; margin-bottom: 2.5rem; }
+
+.valores { display: grid; gap: 1.2rem; }
+.valor {
+  text-align: center;
+  background: var(--blanco);
+  border: 3px solid var(--marron);
+  border-radius: var(--radio);
+  padding: 1.5rem 1.2rem;
+  box-shadow: var(--sombra);
+}
+.valor__icono { font-size: 2.6rem; display: block; margin-bottom: 0.4rem; }
+.valor p { margin: 0; font-size: 0.98rem; }
+
+/* ---------- 11. CONTACTO ---------- */
+.contacto__grilla { display: grid; gap: 2.5rem; }
+.seccion--oscura h2 { color: var(--mostaza); }
+
+.datos li { display: flex; gap: 0.7rem; margin-bottom: 0.8rem; }
+
+.redes-titulo { font-weight: 800; margin: 1.6rem 0 0.6rem; }
+.redes { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.redes a {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 800;
+  border: 2px solid var(--mostaza);
+  color: var(--mostaza);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.redes a:hover { background: var(--mostaza); color: var(--marron); }
+
+.formulario {
+  background: var(--crema);
+  color: var(--marron);
+  border: 3px solid var(--mostaza);
+  border-radius: var(--radio);
+  padding: 1.5rem;
+}
+.formulario label { display: block; font-weight: 800; margin: 0.9rem 0 0.3rem; }
+.formulario input,
+.formulario textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--marron);
+  background: var(--blanco);
+  border: 2px solid var(--marron);
+  border-radius: var(--radio-chico);
+  padding: 0.7rem 0.9rem;
+}
+.formulario textarea { resize: vertical; }
+.formulario .btn { margin-top: 1.3rem; }
+.formulario__estado { margin: 0.8rem 0 0; font-weight: 700; min-height: 1.5em; text-align: center; }
+.formulario__estado--error { color: var(--tomate); }
+.formulario__estado--ok { color: var(--lechuga); }
+
+/* ---------- 12. PIE DE PÁGINA ---------- */
+.pie {
+  background: #1B0E09;
+  color: var(--crema);
+  padding: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.pie__interior { display: grid; gap: 0.3rem; text-align: center; }
+.pie p { margin: 0; }
+
+/* ---------- 13. AVISO FLOTANTE (toast) ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translate(-50%, 140%);
+  background: var(--marron);
+  color: var(--crema);
+  font-weight: 700;
+  padding: 0.8rem 1.4rem;
+  border: 2px solid var(--mostaza);
+  border-radius: 999px;
+  box-shadow: var(--sombra-fuerte);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 300;
+  max-width: calc(100% - 2rem);
+  text-align: center;
+}
+.toast--visible { transform: translate(-50%, 0); opacity: 1; }
+
+/* ==========================================================
+   PANTALLAS MÁS GRANDES
+   ========================================================== */
+
+/* Tablet */
+@media (min-width: 640px) {
+  .menu-grilla { grid-template-columns: repeat(2, 1fr); }
+  .valores { grid-template-columns: repeat(3, 1fr); }
+
+  .carrito { padding: 2rem; }
+  .carrito__item { grid-template-columns: auto 1fr auto auto auto; }
+  .carrito__controles { display: contents; } /* los controles pasan a ser columnas de la misma fila */
+  .carrito__subtotal { min-width: 5.5rem; text-align: right; }
+}
+
+/* Computadora: el menú se muestra en línea */
+@media (min-width: 900px) {
+  .btn-menu { display: none; }
+
+  .nav {
+    position: static;
+    display: block;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+  .nav__lista { display: flex; gap: 0.3rem; padding: 0; }
+  .nav__lista a {
+    border: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+  }
+  .nav__lista a:hover { background: var(--marron); color: var(--mostaza); }
+
+  .marca__logo { width: 150px; height: 70px; }
+  :root { --alto-encabezado: 84px; }
+
+  .inicio { padding-bottom: 6rem; }
+  .inicio__grilla { grid-template-columns: 1.1fr 0.9fr; }
+
+  .menu-grilla { grid-template-columns: repeat(4, 1fr); }
+  .contacto__grilla { grid-template-columns: 1fr 1fr; align-items: start; }
+  .pie__interior { grid-template-columns: 1fr auto; text-align: left; }
+}
+
+/* Respeto por quienes prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

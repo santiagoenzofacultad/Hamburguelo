@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hamburguelo | Hamburguesas hechas al momento</title>
+  <meta name="description" content="Hamburguelo: hamburguesas jugosas, hechas al momento y sin vueltas. Armá tu pedido online.">
+
+  <!-- Tipografías: Lilita One (títulos, gruesa y divertida) y Nunito (texto, muy legible) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Enlace para saltar directo al contenido (accesibilidad con teclado) -->
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+
+  <!-- ENCABEZADO FIJO: logo, navegación y contador del carrito -->
+  <header class="encabezado" id="encabezado">
+    <div class="encabezado__barra contenedor">
+
+      <a href="#inicio" class="marca" aria-label="Hamburguelo, ir al inicio">
+        <!-- El logo es cuadrado con mucho margen amarillo; en CSS se recorta para que se vea más ancho -->
+        <img src="logo.jpg" alt="Logo de Hamburguelo" class="marca__logo" width="132" height="63">
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Navegación principal">
+        <ul class="nav__lista">
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#carrito">Carrito</a></li>
+          <li><a href="#nosotros">Quiénes somos</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <div class="encabezado__acciones">
+        <!-- Contador del carrito, siempre visible. aria-live avisa a lectores de pantalla cuando cambia -->
+        <a href="#carrito" class="carrito-chip" aria-label="Ir al carrito">
+          <span aria-hidden="true">🛒</span>
+          <span class="carrito-chip__cuenta" id="contador-carrito" aria-live="polite">0</span>
+        </a>
+
+        <!-- Botón de menú, solo se ve en pantallas chicas -->
+        <button class="btn-menu" id="btn-menu" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú de navegación">
+          <span class="btn-menu__linea"></span>
+          <span class="btn-menu__linea"></span>
+          <span class="btn-menu__linea"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido">
+
+    <!-- 1. INICIO -->
+    <section class="inicio" id="inicio" aria-labelledby="titulo-inicio">
+      <div class="contenedor inicio__grilla">
+        <div class="inicio__texto">
+          <p class="etiqueta">Hamburguesas hechas al momento</p>
+          <h1 id="titulo-inicio">Jugosas, calentitas y sin vueltas.</h1>
+          <p class="inicio__bajada">
+            Carne bien sellada, pan blandito y queso que se derrite de verdad.
+            Elegí la tuya, armá el pedido y listo.
+          </p>
+          <a href="#menu" class="btn btn--principal">Ver el menú</a>
+        </div>
+        <div class="inicio__logo">
+          <img src="logo.jpg" alt="Hamburguesa con queso, lechuga y tomate sobre el nombre Hamburguelo" width="420" height="420">
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MENÚ -->
+    <section class="seccion" id="menu" aria-labelledby="titulo-menu">
+      <div class="contenedor">
+        <header class="seccion__cabecera">
+          <p class="etiqueta etiqueta--oscura">Nuestro menú</p>
+          <h2 id="titulo-menu">Cuatro hamburguesas, cero dudas</h2>
+          <p>Todas llevan pan de papa tostado y se arman al momento.</p>
+        </header>
+
+        <!-- Las tarjetas se generan desde script.js a partir del array PRODUCTOS -->
+        <div class="menu-grilla" id="menu-grilla"></div>
+      </div>
+    </section>
+
+    <!-- 3. CARRITO -->
+    <section class="seccion seccion--crema" id="carrito" aria-labelledby="titulo-carrito">
+      <div class="contenedor contenedor--angosto">
+        <header class="seccion__cabecera">
+          <p class="etiqueta etiqueta--oscura">Tu pedido</p>
+          <h2 id="titulo-carrito">Carrito</h2>
+        </header>
+
+        <div class="carrito" id="carrito-caja">
+          <!-- Mensaje cuando está vacío -->
+          <div class="carrito__vacio" id="carrito-vacio">
+            <p class="carrito__vacio-emoji" aria-hidden="true">🍔</p>
+            <p><strong>Tu carrito está vacío.</strong></p>
+            <p>Dale, elegí una del menú que no te vas a arrepentir.</p>
+            <a href="#menu" class="btn btn--secundario">Ir al menú</a>
+          </div>
+
+          <!-- Lista de productos (se completa desde script.js) -->
+          <ul class="carrito__lista" id="carrito-lista"></ul>
+
+          <!-- Total y botón de pago -->
+          <div class="carrito__pie" id="carrito-pie" hidden>
+            <div class="carrito__total">
+              <span>Total</span>
+              <strong id="carrito-total">$ 0</strong>
+            </div>
+            <button type="button" class="btn btn--principal btn--ancho" id="btn-pagar">Pagar</button>
+            <button type="button" class="btn-texto" id="btn-vaciar">Vaciar carrito</button>
+            <p class="carrito__aviso" id="aviso-pago"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. QUIÉNES SOMOS -->
+    <section class="seccion" id="nosotros" aria-labelledby="titulo-nosotros">
+      <div class="contenedor contenedor--angosto">
+        <header class="seccion__cabecera">
+          <p class="etiqueta etiqueta--oscura">Quiénes somos</p>
+          <h2 id="titulo-nosotros">Una parrilla, un sueño y mucho queso</h2>
+        </header>
+
+        <p class="nosotros__historia">
+          Hamburguelo nació en una parrillita de barrio, con una idea simple: hacer la hamburguesa
+          que a uno le gustaría comerse un viernes a la noche. Sin vueltas, sin ingredientes raros
+          y sin apuro. Hoy seguimos cocinando igual: una a una, al momento y con ganas.
+        </p>
+
+        <ul class="valores">
+          <li class="valor">
+            <span class="valor__icono" aria-hidden="true">🥬</span>
+            <h3>Ingredientes frescos</h3>
+            <p>Verduras del día y carne que llega fresca, nunca congelada.</p>
+          </li>
+          <li class="valor">
+            <span class="valor__icono" aria-hidden="true">🔥</span>
+            <h3>Hecho al momento</h3>
+            <p>Tu hamburguesa empieza a cocinarse cuando hacés el pedido.</p>
+          </li>
+          <li class="valor">
+            <span class="valor__icono" aria-hidden="true">👌</span>
+            <h3>Sin vueltas</h3>
+            <p>Pedí fácil, pagá fácil y disfrutá. Así de simple.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. CONTACTO -->
+    <section class="seccion seccion--oscura" id="contacto" aria-labelledby="titulo-contacto">
+      <div class="contenedor contacto__grilla">
+
+        <div class="contacto__datos">
+          <p class="etiqueta">Contacto</p>
+          <h2 id="titulo-contacto">¿Hablamos?</h2>
+          <p>Todos los datos de esta sección son ficticios, es una página de demostración.</p>
+
+          <ul class="datos">
+            <li><span aria-hidden="true">📞</span> <span><strong>Teléfono:</strong> 099 123 456</span></li>
+            <li><span aria-hidden="true">📍</span> <span><strong>Dirección:</strong> Av. del Sabor 1234, Montevideo</span></li>
+            <li><span aria-hidden="true">🕒</span> <span><strong>Horarios:</strong> Martes a domingo, de 19:00 a 00:00</span></li>
+          </ul>
+
+          <p class="redes-titulo">Seguinos</p>
+          <ul class="redes">
+            <li><a href="#contacto">Instagram</a></li>
+            <li><a href="#contacto">Facebook</a></li>
+            <li><a href="#contacto">TikTok</a></li>
+          </ul>
+        </div>
+
+        <form class="formulario" id="formulario-contacto" novalidate>
+          <h3>Escribinos</h3>
+
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+
+          <label for="correo">Correo electrónico</label>
+          <input type="email" id="correo" name="correo" autocomplete="email" required>
+
+          <label for="mensaje">Mensaje</label>
+          <textarea id="mensaje" name="mensaje" rows="4" required></textarea>
+
+          <button type="submit" class="btn btn--principal btn--ancho">Enviar mensaje</button>
+          <p class="formulario__estado" id="formulario-estado" role="status"></p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie__interior">
+      <p>© 2026 Hamburguelo</p>
+      <p><strong>Sitio de demostración.</strong> No se realizan ventas ni envíos reales.</p>
+    </div>
+  </footer>
+
+  <!-- Aviso breve cuando se agrega algo al carrito -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
