@@ -1,0 +1,3 @@
+# Le dice a Netlify dónde están las funciones de servidor
+[functions]
+  directory = "netlify/functions"

@@ -114,7 +114,26 @@
               <span>Total</span>
               <strong id="carrito-total">$ 0</strong>
             </div>
-            <button type="button" class="btn btn--principal btn--ancho" id="btn-pagar">Pagar</button>
+            <!-- Opción 1: pagar online con Mercado Pago (Checkout Pro) -->
+            <form class="pago" id="form-mercadopago" action="/.netlify/functions/crear-pago" method="POST">
+              <button type="submit" class="btn btn--mp btn--ancho" id="btn-mercadopago" data-mp-checkout-cta="checkout-pro">
+                Pagar con Mercado Pago
+              </button>
+            </form>
+
+            <p class="pago__separador"><span>o</span></p>
+
+            <!-- Opción 2: mandar el pedido por WhatsApp, indicando el método de pago -->
+            <div class="pago">
+              <label for="metodo-whatsapp" class="pago__etiqueta">Cómo querés pagar</label>
+              <select id="metodo-whatsapp" class="pago__select">
+                <option value="Efectivo al recibir">Efectivo al recibir</option>
+                <option value="Transferencia bancaria">Transferencia bancaria</option>
+                <option value="A coordinar por WhatsApp">A coordinar por WhatsApp</option>
+              </select>
+              <button type="button" class="btn btn--whatsapp btn--ancho" id="btn-whatsapp">Pedir por WhatsApp</button>
+            </div>
+
             <button type="button" class="btn-texto" id="btn-vaciar">Vaciar carrito</button>
             <p class="carrito__aviso" id="aviso-pago"></p>
           </div>

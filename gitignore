@@ -1,0 +1,5 @@
+.env
+.env.*.local
+.mp-integrate-progress.md
+node_modules/
+.netlify/

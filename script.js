@@ -12,28 +12,25 @@
 /* ==========================================================
    1. CONFIGURACIÓN DEL PAGO
    ----------------------------------------------------------
-   CÓMO CAMBIAR LOS LINKS:
-   - Creá una cuenta en el servicio que quieras (Mercado Pago, Stripe, PayPal...)
-     y usá su MODO DE PRUEBAS (sandbox / test), así no se mueve plata real.
-   - Generá un "link de pago" desde el panel de ese servicio.
-   - Pegalo donde dice "REEMPLAZAR POR TU LINK".
+   Hay dos formas de pagar:
 
-   MODOS DISPONIBLES:
-   - "link":     el botón Pagar lleva al link de pago.
-   - "whatsapp": el botón Pagar arma el pedido y abre WhatsApp.
+   A) MERCADO PAGO (Checkout Pro)
+      El navegador le manda el carrito a una función de servidor
+      (netlify/functions/crear-pago.mjs). Esa función, con el Access Token
+      secreto, le pide a Mercado Pago que cree el pago con el total real y
+      devuelve un link. Después redirigimos al cliente a ese link.
+      El Access Token NO va en este archivo: se carga en Netlify como
+      variable de entorno (MP_ACCESS_TOKEN).
 
-   IMPORTANTE: un link de pago fijo tiene un monto fijo. Para que el monto
-   coincida con el total del carrito hace falta un pequeño servidor que cree
-   el cobro con el total (por ejemplo, con funciones de Netlify).
-   Para una demo, un link de prueba alcanza.
+   B) WHATSAPP
+      Arma un mensaje con el pedido, el total y el método de pago elegido,
+      y abre WhatsApp. Cambiá el número por el tuyo.
    ========================================================== */
 const CONFIG_PAGO = {
-  modo: "link", // "link" o "whatsapp"
+  // Dirección de la función de servidor en Netlify
+  funcionMercadoPago: "/.netlify/functions/crear-pago",
 
-  // REEMPLAZAR POR TU LINK (de un servicio de pagos en modo de pruebas)
-  linkDePago: "https://REEMPLAZAR-POR-TU-LINK-DE-PAGO",
-
-  // REEMPLAZAR POR TU NÚMERO (formato internacional, sin + ni espacios). Solo para el modo "whatsapp".
+  // REEMPLAZAR POR TU NÚMERO (formato internacional, sin + ni espacios). Ej.: 598 + 9 dígitos
   whatsappNumero: "59800000000"
 };
 
@@ -308,32 +305,81 @@ function dibujarCarrito() {
 /* ==========================================================
    8. BOTÓN "PAGAR"
    ========================================================== */
-function pagar() {
+// --- Opción A: Mercado Pago ---
+async function pagarMercadoPago(evento) {
+  evento.preventDefault(); // el botón está dentro de un <form>: evitamos que recargue la página
+
+  const aviso = document.getElementById("aviso-pago");
+  const boton = document.getElementById("btn-mercadopago");
+  aviso.textContent = "";
+
+  if (carrito.length === 0) return;
+
+  // Solo mandamos ids y cantidades. Los precios los calcula el servidor.
+  const pedido = carrito.map(function (item) {
+    return { id: item.id, cantidad: item.cantidad };
+  });
+
+  boton.disabled = true;
+  boton.textContent = "Conectando con Mercado Pago…";
+
+  try {
+    const respuesta = await fetch(CONFIG_PAGO.funcionMercadoPago, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: pedido })
+    });
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok || !datos.url) {
+      throw new Error(datos.error || "No se pudo crear el pago.");
+    }
+
+    // Llevamos al cliente a la página de pago de Mercado Pago
+    window.location.href = datos.url;
+  } catch (error) {
+    aviso.textContent = "No pudimos iniciar el pago con Mercado Pago. Probá de nuevo en un momento. " +
+                        "(Si abriste el archivo directo desde tu compu, esta opción solo funciona en Netlify.)";
+    boton.disabled = false;
+    boton.textContent = "Pagar con Mercado Pago";
+  }
+}
+
+// --- Opción B: WhatsApp ---
+function pagarWhatsApp() {
   const aviso = document.getElementById("aviso-pago");
   aviso.textContent = "";
 
   if (carrito.length === 0) return;
 
-  if (CONFIG_PAGO.modo === "whatsapp") {
-    // Armamos un texto con el pedido y lo mandamos por WhatsApp
-    const lineas = carrito.map(function (item) {
-      const p = buscarProducto(item.id);
-      return "• " + item.cantidad + " x " + p.nombre + " (" + formatoDinero.format(p.precio * item.cantidad) + ")";
-    });
-    const mensaje = "Hola Hamburguelo! Quiero hacer este pedido:\n" + lineas.join("\n") +
-                    "\nTotal: " + formatoDinero.format(calcularTotal());
-    const url = "https://wa.me/" + CONFIG_PAGO.whatsappNumero + "?text=" + encodeURIComponent(mensaje);
-    window.open(url, "_blank", "noopener");
-    return;
-  }
+  const metodo = document.getElementById("metodo-whatsapp").value;
 
-  // Modo "link": si todavía está el texto de ejemplo, avisamos en vez de ir a una dirección falsa
-  if (CONFIG_PAGO.linkDePago.indexOf("REEMPLAZAR") !== -1) {
-    aviso.textContent = "Demo: falta cargar el link de pago en CONFIG_PAGO (script.js).";
-    return;
-  }
+  // Armamos un texto con el pedido, el total y el método de pago
+  const lineas = carrito.map(function (item) {
+    const p = buscarProducto(item.id);
+    return "• " + item.cantidad + " x " + p.nombre + " (" + formatoDinero.format(p.precio * item.cantidad) + ")";
+  });
+  const mensaje = "Hola Hamburguelo! Quiero hacer este pedido:\n" + lineas.join("\n") +
+                  "\n\nTotal: " + formatoDinero.format(calcularTotal()) +
+                  "\nMétodo de pago: " + metodo;
 
-  window.location.href = CONFIG_PAGO.linkDePago;
+  const url = "https://wa.me/" + CONFIG_PAGO.whatsappNumero + "?text=" + encodeURIComponent(mensaje);
+  window.open(url, "_blank", "noopener");
+}
+
+// Mensaje cuando el cliente vuelve de Mercado Pago (la página recibe ?pago=...)
+// OJO: esto es solo informativo. El estado real del pago lo confirma el servidor (ver webhooks).
+function mostrarResultadoDePago() {
+  const parametros = new URLSearchParams(window.location.search);
+  const resultado = parametros.get("pago");
+  if (!resultado) return;
+
+  const textos = {
+    exitoso: "Volviste de Mercado Pago. ¡Gracias por tu pedido!",
+    fallido: "El pago no se completó. Podés intentarlo de nuevo.",
+    pendiente: "Tu pago quedó pendiente de confirmación."
+  };
+  if (textos[resultado]) mostrarToast(textos[resultado]);
 }
 
 
@@ -423,10 +469,12 @@ document.getElementById("carrito-lista").addEventListener("click", function (eve
   if (quitar) quitarDelCarrito(quitar.dataset.quitar);
 });
 
-document.getElementById("btn-pagar").addEventListener("click", pagar);
+document.getElementById("form-mercadopago").addEventListener("submit", pagarMercadoPago);
+document.getElementById("btn-whatsapp").addEventListener("click", pagarWhatsApp);
 document.getElementById("btn-vaciar").addEventListener("click", vaciarCarrito);
 
 dibujarMenu();
 dibujarCarrito();
 configurarMenuMovil();
 configurarFormulario();
+mostrarResultadoDePago();

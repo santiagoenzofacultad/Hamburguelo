@@ -438,6 +438,45 @@ a { color: inherit; }
 }
 .carrito__aviso { margin: 0.8rem 0 0; font-size: 0.92rem; color: var(--marron-suave); }
 
+/* ---------- 9.b OPCIONES DE PAGO ---------- */
+.pago { text-align: left; }
+
+/* Mercado Pago: azul de la marca, con texto oscuro para que se lea bien */
+.btn--mp { background: #009EE3; color: #FFFFFF; }
+.btn--mp:hover { background: #0087C3; }
+.btn--mp:disabled { opacity: 0.7; cursor: wait; transform: none; box-shadow: none; }
+
+/* WhatsApp: verde oscuro para mantener buen contraste con el texto blanco */
+.btn--whatsapp { background: #128C4A; color: #FFFFFF; }
+.btn--whatsapp:hover { background: #0E7339; }
+
+.pago__separador {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.1rem 0;
+  font-weight: 800;
+  color: var(--marron-suave);
+}
+.pago__separador::before,
+.pago__separador::after {
+  content: "";
+  flex: 1;
+  border-top: 2px dashed rgba(43, 24, 16, 0.25);
+}
+
+.pago__etiqueta { display: block; font-weight: 800; margin-bottom: 0.3rem; }
+.pago__select {
+  width: 100%;
+  font: inherit;
+  color: var(--marron);
+  background: var(--blanco);
+  border: 2px solid var(--marron);
+  border-radius: var(--radio-chico);
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
 /* ---------- 10. QUIÉNES SOMOS ---------- */
 .nosotros__historia { font-size: 1.15rem; text-align: center; margin-bottom: 2.5rem; }
 
