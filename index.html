@@ -105,6 +105,13 @@
             <a href="#menu" class="btn btn--secundario">Ir al menú</a>
           </div>
 
+          <!-- Aparece al volver de Mercado Pago, para avisarle los datos del pedido al negocio -->
+          <div class="carrito__confirmado" id="pago-confirmado" hidden>
+            <p><strong>¡Gracias por tu pago!</strong></p>
+            <p>Para que preparemos tu pedido, mandanos los datos por WhatsApp.</p>
+            <button type="button" class="btn btn--whatsapp btn--ancho" id="btn-whatsapp-confirmar">Enviar mi pedido por WhatsApp</button>
+          </div>
+
           <!-- Lista de productos (se completa desde script.js) -->
           <ul class="carrito__lista" id="carrito-lista"></ul>
 
@@ -114,6 +121,50 @@
               <span>Total</span>
               <strong id="carrito-total">$ 0</strong>
             </div>
+            <!-- Datos del pedido: se piden antes de pagar, sea cual sea la opción de pago -->
+            <fieldset class="datos-pedido" id="datos-pedido">
+              <legend>¿Cómo querés recibir tu pedido?</legend>
+
+              <div class="tipo-entrega">
+                <label class="tipo-entrega__opcion">
+                  <input type="radio" name="tipo-entrega" value="delivery" checked>
+                  <span>🛵 Delivery <small>(sin costo)</small></span>
+                </label>
+                <label class="tipo-entrega__opcion">
+                  <input type="radio" name="tipo-entrega" value="retiro">
+                  <span>🏪 Retiro en el local</span>
+                </label>
+              </div>
+
+              <div class="campo">
+                <label for="dato-nombre">Nombre</label>
+                <input type="text" id="dato-nombre" autocomplete="given-name" maxlength="60">
+              </div>
+              <div class="campo">
+                <label for="dato-apellido">Apellido</label>
+                <input type="text" id="dato-apellido" autocomplete="family-name" maxlength="60">
+              </div>
+              <div class="campo">
+                <label for="dato-celular">Celular</label>
+                <input type="tel" id="dato-celular" inputmode="tel" autocomplete="tel" placeholder="099 123 456" maxlength="30">
+              </div>
+
+              <!-- Solo se muestran si el pedido es delivery -->
+              <div id="campos-delivery">
+                <div class="campo">
+                  <label for="dato-direccion">Dirección</label>
+                  <input type="text" id="dato-direccion" autocomplete="street-address" placeholder="Calle y número (apto, si corresponde)" maxlength="150">
+                </div>
+                <div class="campo">
+                  <label for="dato-referencias">Datos para encontrar la casa <small>(opcional)</small></label>
+                  <textarea id="dato-referencias" rows="2" placeholder="Esquina, color de la puerta, timbre, portón..." maxlength="200"></textarea>
+                </div>
+              </div>
+
+              <p class="datos-pedido__error" id="aviso-datos" role="alert"></p>
+              <p class="datos-pedido__nota">Usamos tus datos solo para preparar y entregar este pedido.</p>
+            </fieldset>
+
             <!-- Opción 1: pagar online con Mercado Pago (Checkout Pro) -->
             <form class="pago" id="form-mercadopago" action="/.netlify/functions/crear-pago" method="POST">
               <button type="submit" class="btn btn--mp btn--ancho" id="btn-mercadopago" data-mp-checkout-cta="checkout-pro">

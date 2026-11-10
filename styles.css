@@ -477,6 +477,69 @@ a { color: inherit; }
   margin-bottom: 0.8rem;
 }
 
+/* ---------- 9.c DATOS DEL PEDIDO (delivery / retiro) ---------- */
+.datos-pedido {
+  text-align: left;
+  border: 2px solid var(--marron);
+  border-radius: var(--radio);
+  padding: 1rem 1.1rem 1.1rem;
+  margin: 0 0 1.4rem;
+  background: var(--blanco);
+}
+.datos-pedido legend {
+  font-family: var(--fuente-titulos);
+  font-size: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.tipo-entrega { display: grid; gap: 0.6rem; margin-bottom: 0.6rem; }
+.tipo-entrega__opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  border: 2px solid rgba(43, 24, 16, 0.35);
+  border-radius: var(--radio-chico);
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+}
+.tipo-entrega__opcion:has(input:checked) { border-color: var(--marron); background: var(--crema); }
+.tipo-entrega__opcion input { width: 1.2rem; height: 1.2rem; accent-color: var(--marron); }
+.tipo-entrega__opcion small { font-weight: 600; }
+
+.campo { margin-top: 0.8rem; }
+.campo label { display: block; font-weight: 800; margin-bottom: 0.25rem; }
+.campo label small { font-weight: 600; }
+.campo input,
+.campo textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--marron);
+  background: var(--blanco);
+  border: 2px solid var(--marron);
+  border-radius: var(--radio-chico);
+  padding: 0.65rem 0.85rem;
+}
+.campo textarea { resize: vertical; }
+.campo input[aria-invalid="true"] { border-color: var(--tomate); outline: 2px solid var(--tomate); }
+
+.datos-pedido__error { margin: 0.8rem 0 0; font-weight: 800; color: var(--tomate); min-height: 1.4em; }
+.datos-pedido__nota { margin: 0; font-size: 0.85rem; color: var(--marron-suave); }
+
+.carrito__confirmado {
+  text-align: center;
+  background: var(--blanco);
+  border: 2px solid var(--lechuga);
+  border-radius: var(--radio);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+.carrito__confirmado[hidden] { display: none; }
+
+@media (min-width: 640px) {
+  .tipo-entrega { grid-template-columns: 1fr 1fr; }
+}
+
 /* ---------- 10. QUIÉNES SOMOS ---------- */
 .nosotros__historia { font-size: 1.15rem; text-align: center; margin-bottom: 2.5rem; }
 

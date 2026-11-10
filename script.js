@@ -31,7 +31,7 @@ const CONFIG_PAGO = {
   funcionMercadoPago: "/.netlify/functions/crear-pago",
 
   // REEMPLAZAR POR TU NÚMERO (formato internacional, sin + ni espacios). Ej.: 598 + 9 dígitos
-  whatsappNumero: "59800000000"
+  whatsappNumero: "59898745641"
 };
 
 
@@ -305,6 +305,115 @@ function dibujarCarrito() {
 /* ==========================================================
    8. BOTÓN "PAGAR"
    ========================================================== */
+// --- Datos del pedido (delivery o retiro) ---
+
+// Muestra u oculta los campos de dirección según el tipo de entrega elegido
+function configurarTipoEntrega() {
+  const radios = document.querySelectorAll('input[name="tipo-entrega"]');
+  const camposDelivery = document.getElementById("campos-delivery");
+
+  function actualizar() {
+    const tipo = document.querySelector('input[name="tipo-entrega"]:checked').value;
+    camposDelivery.hidden = (tipo !== "delivery");
+  }
+
+  radios.forEach(function (radio) { radio.addEventListener("change", actualizar); });
+  actualizar();
+}
+
+// Lee y valida los datos del formulario.
+// Devuelve un objeto con los datos, o null si falta algo (y avisa en pantalla).
+// OJO: esta validación es solo para ayudar al cliente. El servidor la repite.
+function leerDatosPedido() {
+  const aviso = document.getElementById("aviso-datos");
+  const campos = {
+    nombre: document.getElementById("dato-nombre"),
+    apellido: document.getElementById("dato-apellido"),
+    celular: document.getElementById("dato-celular"),
+    direccion: document.getElementById("dato-direccion"),
+    referencias: document.getElementById("dato-referencias")
+  };
+
+  // Limpiamos errores anteriores
+  aviso.textContent = "";
+  Object.keys(campos).forEach(function (clave) { campos[clave].removeAttribute("aria-invalid"); });
+
+  const tipo = document.querySelector('input[name="tipo-entrega"]:checked').value;
+  const datos = {
+    tipo: tipo,
+    nombre: campos.nombre.value.trim(),
+    apellido: campos.apellido.value.trim(),
+    celular: campos.celular.value.trim(),
+    direccion: tipo === "delivery" ? campos.direccion.value.trim() : "",
+    referencias: tipo === "delivery" ? campos.referencias.value.trim() : ""
+  };
+
+  // Marca el campo con problema, muestra el mensaje y lleva el cursor ahí
+  function fallar(campo, mensaje) {
+    campo.setAttribute("aria-invalid", "true");
+    aviso.textContent = mensaje;
+    campo.focus();
+    return null;
+  }
+
+  if (!datos.nombre) return fallar(campos.nombre, "Escribí tu nombre.");
+  if (!datos.apellido) return fallar(campos.apellido, "Escribí tu apellido.");
+
+  const digitos = datos.celular.replace(/\D/g, ""); // nos quedamos solo con los números
+  if (digitos.length < 8 || digitos.length > 15) {
+    return fallar(campos.celular, "Revisá el celular: tiene que tener entre 8 y 15 números.");
+  }
+  if (tipo === "delivery" && datos.direccion.length < 5) {
+    return fallar(campos.direccion, "Escribí la dirección de entrega (calle y número).");
+  }
+
+  return datos;
+}
+
+// Texto con los datos del cliente, para el mensaje de WhatsApp
+function textoDatosPedido(datos) {
+  const lineas = [
+    "Tipo de pedido: " + (datos.tipo === "delivery" ? "Delivery (sin costo)" : "Retiro en el local"),
+    "Nombre: " + datos.nombre + " " + datos.apellido,
+    "Celular: " + datos.celular
+  ];
+  if (datos.tipo === "delivery") {
+    lineas.push("Dirección: " + datos.direccion);
+    if (datos.referencias) lineas.push("Para encontrar la casa: " + datos.referencias);
+  }
+  return lineas.join("\n");
+}
+
+// Texto con la lista de productos. "items" es un array de { id, cantidad }
+function textoItems(items) {
+  return items.map(function (item) {
+    const p = buscarProducto(item.id);
+    return "• " + item.cantidad + " x " + p.nombre + " (" + formatoDinero.format(p.precio * item.cantidad) + ")";
+  }).join("\n");
+}
+
+function abrirWhatsApp(mensaje) {
+  const url = "https://wa.me/" + CONFIG_PAGO.whatsappNumero + "?text=" + encodeURIComponent(mensaje);
+  window.open(url, "_blank", "noopener");
+}
+
+// Guardamos el pedido antes de ir a Mercado Pago, para poder mandarlo por WhatsApp al volver
+const CLAVE_PEDIDO_PENDIENTE = "hamburguelo_pedido_pendiente";
+
+function guardarPedidoPendiente(pedido) {
+  try { localStorage.setItem(CLAVE_PEDIDO_PENDIENTE, JSON.stringify(pedido)); } catch (error) { /* sin guardado */ }
+}
+function leerPedidoPendiente() {
+  try {
+    const guardado = localStorage.getItem(CLAVE_PEDIDO_PENDIENTE);
+    return guardado ? JSON.parse(guardado) : null;
+  } catch (error) { return null; }
+}
+function borrarPedidoPendiente() {
+  try { localStorage.removeItem(CLAVE_PEDIDO_PENDIENTE); } catch (error) { /* nada */ }
+}
+
+
 // --- Opción A: Mercado Pago ---
 async function pagarMercadoPago(evento) {
   evento.preventDefault(); // el botón está dentro de un <form>: evitamos que recargue la página
@@ -314,6 +423,10 @@ async function pagarMercadoPago(evento) {
   aviso.textContent = "";
 
   if (carrito.length === 0) return;
+
+  // Primero validamos los datos del pedido. Si falta algo, no seguimos.
+  const cliente = leerDatosPedido();
+  if (!cliente) return;
 
   // Solo mandamos ids y cantidades. Los precios los calcula el servidor.
   const pedido = carrito.map(function (item) {
@@ -327,13 +440,16 @@ async function pagarMercadoPago(evento) {
     const respuesta = await fetch(CONFIG_PAGO.funcionMercadoPago, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: pedido })
+      body: JSON.stringify({ items: pedido, cliente: cliente })
     });
     const datos = await respuesta.json();
 
     if (!respuesta.ok || !datos.url) {
       throw new Error(datos.error || "No se pudo crear el pago.");
     }
+
+    // Guardamos el pedido para mandarlo por WhatsApp cuando el cliente vuelva
+    guardarPedidoPendiente({ items: pedido, total: calcularTotal(), cliente: cliente });
 
     // Llevamos al cliente a la página de pago de Mercado Pago
     window.location.href = datos.url;
@@ -352,34 +468,53 @@ function pagarWhatsApp() {
 
   if (carrito.length === 0) return;
 
+  const cliente = leerDatosPedido();
+  if (!cliente) return;
+
   const metodo = document.getElementById("metodo-whatsapp").value;
 
-  // Armamos un texto con el pedido, el total y el método de pago
-  const lineas = carrito.map(function (item) {
-    const p = buscarProducto(item.id);
-    return "• " + item.cantidad + " x " + p.nombre + " (" + formatoDinero.format(p.precio * item.cantidad) + ")";
-  });
-  const mensaje = "Hola Hamburguelo! Quiero hacer este pedido:\n" + lineas.join("\n") +
+  const mensaje = "Hola Hamburguelo! Quiero hacer este pedido:\n" + textoItems(carrito) +
                   "\n\nTotal: " + formatoDinero.format(calcularTotal()) +
-                  "\nMétodo de pago: " + metodo;
+                  "\nMétodo de pago: " + metodo +
+                  "\n\n" + textoDatosPedido(cliente);
 
-  const url = "https://wa.me/" + CONFIG_PAGO.whatsappNumero + "?text=" + encodeURIComponent(mensaje);
-  window.open(url, "_blank", "noopener");
+  abrirWhatsApp(mensaje);
 }
 
-// Mensaje cuando el cliente vuelve de Mercado Pago (la página recibe ?pago=...)
-// OJO: esto es solo informativo. El estado real del pago lo confirma el servidor (ver webhooks).
+// --- Después de pagar con Mercado Pago: avisarle el pedido al negocio por WhatsApp ---
+function enviarPedidoConfirmadoPorWhatsApp() {
+  const pendiente = leerPedidoPendiente();
+  if (!pendiente) return;
+
+  const mensaje = "Hola Hamburguelo! Ya pagué mi pedido con Mercado Pago:\n" + textoItems(pendiente.items) +
+                  "\n\nTotal: " + formatoDinero.format(pendiente.total) +
+                  "\nMétodo de pago: Mercado Pago" +
+                  "\n\n" + textoDatosPedido(pendiente.cliente);
+
+  abrirWhatsApp(mensaje);
+  borrarPedidoPendiente();
+  document.getElementById("pago-confirmado").hidden = true;
+}
+
+// Qué hacer cuando el cliente vuelve de Mercado Pago (la página recibe ?pago=...)
+// OJO: la dirección de vuelta se puede escribir a mano, así que esto es solo informativo.
+// El estado real del pago lo confirma el servidor de Mercado Pago (ver webhooks).
 function mostrarResultadoDePago() {
   const parametros = new URLSearchParams(window.location.search);
   const resultado = parametros.get("pago");
   if (!resultado) return;
 
-  const textos = {
-    exitoso: "Volviste de Mercado Pago. ¡Gracias por tu pedido!",
-    fallido: "El pago no se completó. Podés intentarlo de nuevo.",
-    pendiente: "Tu pago quedó pendiente de confirmación."
-  };
-  if (textos[resultado]) mostrarToast(textos[resultado]);
+  if (resultado === "exitoso") {
+    const caja = document.getElementById("pago-confirmado");
+    // Si tenemos el pedido guardado, ofrecemos mandarlo por WhatsApp
+    if (leerPedidoPendiente()) caja.hidden = false;
+    vaciarCarrito();
+    mostrarToast("¡Gracias por tu pago!");
+  } else if (resultado === "fallido") {
+    mostrarToast("El pago no se completó. Podés intentarlo de nuevo.");
+  } else if (resultado === "pendiente") {
+    mostrarToast("Tu pago quedó pendiente de confirmación.");
+  }
 }
 
 
@@ -472,9 +607,11 @@ document.getElementById("carrito-lista").addEventListener("click", function (eve
 document.getElementById("form-mercadopago").addEventListener("submit", pagarMercadoPago);
 document.getElementById("btn-whatsapp").addEventListener("click", pagarWhatsApp);
 document.getElementById("btn-vaciar").addEventListener("click", vaciarCarrito);
+document.getElementById("btn-whatsapp-confirmar").addEventListener("click", enviarPedidoConfirmadoPorWhatsApp);
 
 dibujarMenu();
 dibujarCarrito();
 configurarMenuMovil();
 configurarFormulario();
+configurarTipoEntrega();
 mostrarResultadoDePago();
